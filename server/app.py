@@ -1,4 +1,6 @@
+from datetime import datetime
 from typing import Optional, TypedDict, Annotated
+from langchain_core.tools import tool
 from langgraph.graph import add_messages, StateGraph, END
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
@@ -15,9 +17,17 @@ load_dotenv()
 
 model = ChatOpenAI(model="gpt-4o")
 
+
+@tool
+def get_current_datetime() -> str:
+    """Returns the current date and time in a human-readable format."""
+    now = datetime.now()
+    return now.strftime("%A, %B %d, %Y %H:%M:%S")
+
+
 search_tool = TavilySearchResults(max_results=4)
 
-tools = [search_tool]
+tools = [search_tool, get_current_datetime]
 memory = MemorySaver()
 
 
@@ -31,10 +41,11 @@ llm_with_tools = model.bind_tools(tools)
 async def model(state: State):
 
     system_prompt = """
-    You are a helpful AI chatbot that answers user's queries intelligently using avaliable tools wherever necessary
+    You are a helpful AI chatbot that answers user's queries intelligently using avaliable tools wherever necessary. Always remember you need to give latest information untill a specific date or event is mentioned. Use proper tools to fetch latest information.
 
     The avaliable tools:
-    - tavily_search_results_json: Helps to perform web search and extract out latest information from the web
+    - get_current_datetime: Helps you to get the current date and time. It is particularly useful for finding latest information from web
+    - tavily_search_results_json: Helps to perform web search and extract out latest information from the web. Make sure you find the latest information from the web according to the latest date untill a specific date is mentioned.
 
     IMPORTANT: If you are providing an answer in a markdown format, make sure it is properly formatted. Also if the answer is in points form then you must format in such a way where each point starts from a new line in markdown
     """
@@ -75,6 +86,17 @@ async def tool_node(state: State):
 
             tool_message = ToolMessage(
                 content=str(search_results),
+                tool_call_id=tool_id,
+                name=tool_name
+            )
+
+            tool_messages.append(tool_message)
+
+        if tool_name == "get_current_datetime":
+            current_date_time = await get_current_datetime.ainvoke(tool_args)
+
+            tool_message = ToolMessage(
+                content=str(current_date_time),
                 tool_call_id=tool_id,
                 name=tool_name
             )
