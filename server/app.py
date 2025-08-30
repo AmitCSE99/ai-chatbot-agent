@@ -1,14 +1,25 @@
 from typing import Optional
-from langchain_core.messages import AIMessageChunk, HumanMessage
+from langchain_core.messages import AIMessage, AIMessageChunk, HumanMessage, ToolMessage
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
 import json
-from graph import agent_graph
+from contextlib import asynccontextmanager
+from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+from langgraph.graph.state import CompiledStateGraph
+from graph import create_agent_graph
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with AsyncSqliteSaver.from_conn_string("chatbot.db") as checkpointer:
+        app.state.agent_graph: CompiledStateGraph = create_agent_graph(
+            checkpointer)
+        app.state.checkpointer = checkpointer
+        yield
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,7 +52,7 @@ async def generate_chat_responses(message: str, checkpoint_id: Optional[str] = N
             }
         }
 
-        events = agent_graph.astream_events(
+        events = app.state.agent_graph.astream_events(
             {
                 "messages": [HumanMessage(content=message)]
             },
@@ -57,7 +68,7 @@ async def generate_chat_responses(message: str, checkpoint_id: Optional[str] = N
             }
         }
 
-        events = agent_graph.astream_events(
+        events = app.state.agent_graph.astream_events(
             {
                 "messages": [HumanMessage(content=message)]
             }, config=config, version="v2"
@@ -112,3 +123,43 @@ async def chat_stream(message: str, checkpoint_id: Optional[str] = Query(None)):
         generate_chat_responses(message, checkpoint_id),
         media_type="text/event-stream"
     )
+
+
+@app.get("/get-all")
+async def get_chats():
+    config = {
+        "configurable": {
+            "thread_id": "4647cc2b-3e7a-44db-9de2-59f49c02b889"
+        }
+    }
+    agent_graph: CompiledStateGraph = app.state.agent_graph
+    data = await agent_graph.aget_state(config=config)
+
+    print(data.values['messages'])
+
+    response = {
+        "messages": []
+    }
+
+    for message in data.values["messages"]:
+
+        if (isinstance(message, HumanMessage) or isinstance(message, AIMessage)) and message.content:
+            response["messages"].append({
+                "id": message.id,
+                "message_type": type(message).__name__,
+                "message_content": message.content
+            })
+
+    return response
+
+
+@app.get("/get-threads")
+async def get_threads():
+    checkpointer: AsyncSqliteSaver = app.state.checkpointer
+
+    thread_list = set()
+    async for thread in checkpointer.alist(None):
+        thread_list.add(thread.config["configurable"]["thread_id"])
+    return {
+        "thread_list": thread_list
+    }

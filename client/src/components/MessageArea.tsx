@@ -147,7 +147,7 @@ const MessageArea = ({ messages }: { messages: Message[] }) => {
   return (
     <div
       ref={messageAreaRef}
-      className="flex-grow overflow-y-auto border-b backdrop-blur-sm border-slate-700"
+      className="flex-grow overflow-y-auto rounded-xl border-b backdrop-blur-sm border-slate-700"
       style={{ minHeight: 0 }}
     >
       <div className="max-w-4xl mx-auto p-6">

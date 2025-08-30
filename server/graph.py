@@ -5,8 +5,8 @@ from langgraph.graph import add_messages, StateGraph, END
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 from langchain_community.tools import TavilySearchResults
-from langchain_core.messages import SystemMessage, ToolMessage
-from langgraph.checkpoint.memory import MemorySaver
+from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 load_dotenv()
 
@@ -23,7 +23,8 @@ def get_current_datetime() -> str:
 search_tool = TavilySearchResults(max_results=4)
 
 tools = [search_tool, get_current_datetime]
-memory = MemorySaver()
+
+# The checkpointer is provided by the application at runtime (see FastAPI lifespan)
 
 
 class State(TypedDict):
@@ -102,15 +103,19 @@ async def tool_node(state: State):
         "messages": tool_messages
     }
 
-graph_builder = StateGraph(State)
 
-graph_builder.add_node("model", model)
-graph_builder.add_node("tool_node", tool_node)
+def create_agent_graph(checkpointer: AsyncSqliteSaver):
+    graph_builder = StateGraph(State)
 
-graph_builder.set_entry_point("model")
+    graph_builder.add_node("model", model)
+    graph_builder.add_node("tool_node", tool_node)
 
-graph_builder.add_conditional_edges("model", tools_router)
+    graph_builder.set_entry_point("model")
 
-graph_builder.add_edge("tool_node", "model")
+    graph_builder.add_conditional_edges("model", tools_router)
 
-agent_graph = graph_builder.compile(checkpointer=memory)
+    graph_builder.add_edge("tool_node", "model")
+
+    agent = graph_builder.compile(checkpointer=checkpointer)
+
+    return agent

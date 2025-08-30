@@ -1,7 +1,8 @@
+import Link from "next/link";
+
 const Header = () => {
   return (
     <header className="relative flex items-center justify-between px-8 py-5 bg-gradient-to-r from-purple-800 to-indigo-800 z-10 border-b border-purple-700">
-      <div className="absolute inset-0 bg-[url('/api/placeholder/100/100')] opacity-5 mix-blend-overlay"></div>
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
       <div className="flex items-center relative">
@@ -12,12 +13,18 @@ const Header = () => {
       </div>
 
       <div className="flex items-center space-x-1">
-        <a className="text-white/80 text-xs px-4 py-2 font-medium hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 cursor-pointer">
-          HOME
-        </a>
-        <a className="text-white bg-white/10 text-xs px-4 py-2 font-medium hover:bg-white/15 rounded-lg transition-all duration-200 cursor-pointer">
-          CHAT
-        </a>
+        <Link
+          href={"/about"}
+          className="text-white/80 text-xs px-4 py-2 font-medium hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 hover:cursor-pointer"
+        >
+          NEW CHAT
+        </Link>
+        <Link
+          href={"/"}
+          className="text-white bg-white/10 text-xs px-4 py-2 font-medium hover:bg-white/15 rounded-lg transition-all duration-200 cursor-pointer"
+        >
+          YOUR CHATS
+        </Link>
         <a className="text-white/80 text-xs px-4 py-2 font-medium hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 cursor-pointer">
           CONTACTS
         </a>
