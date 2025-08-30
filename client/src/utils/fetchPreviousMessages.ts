@@ -1,6 +1,6 @@
-export async function fetchPreviousMessages() {
+export async function fetchPreviousMessages(threadId: string) {
   try {
-    const response = await fetch("http://127.0.0.1:8000/get-all");
+    const response = await fetch(`http://127.0.0.1:8000/get-all/${threadId}`);
     const json = await response.json();
 
     const messagesList = json.messages.map(

@@ -1,5 +1,5 @@
-import ChatArea from "@/components/ChatArea";
-import { fetchPreviousMessages } from "@/utils/fetchPreviousMessages";
+import PreviousThreadList from "@/components/PreviousThreadList";
+import { fetchPreviousThreads } from "@/utils/fetchPreviousThreads";
 
 export interface SearchInfo {
   stages: string[];
@@ -17,13 +17,13 @@ export interface Message {
 }
 
 export default async function Home() {
-  const messages = await fetchPreviousMessages();
+  const threadList = await fetchPreviousThreads();
 
   return (
     <div className="flex justify-center py-8 px-4">
       {/* Main container with refined shadow and border */}
       <div className="w-[70%] rounded-xl shadow-lg border border-slate-700">
-        <ChatArea previousMessages={messages} />
+        <PreviousThreadList threadList={threadList} />
       </div>
     </div>
   );

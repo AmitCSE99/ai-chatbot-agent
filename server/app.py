@@ -125,11 +125,11 @@ async def chat_stream(message: str, checkpoint_id: Optional[str] = Query(None)):
     )
 
 
-@app.get("/get-all")
-async def get_chats():
+@app.get("/get-all/{thread_id}")
+async def get_chats(thread_id: str):
     config = {
         "configurable": {
-            "thread_id": "4647cc2b-3e7a-44db-9de2-59f49c02b889"
+            "thread_id": thread_id
         }
     }
     agent_graph: CompiledStateGraph = app.state.agent_graph

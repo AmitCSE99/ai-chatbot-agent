@@ -6,7 +6,13 @@ import MessageArea from "./MessageArea";
 import InputBar from "./InputBar";
 import { v4 as uuidv4 } from "uuid";
 
-const ChatArea = ({ previousMessages }: { previousMessages: Message[] }) => {
+const ChatArea = ({
+  previousMessages,
+  threadId,
+}: {
+  previousMessages: Message[];
+  threadId: string;
+}) => {
   const [currentMessage, setCurrentMessage] = useState("");
 
   const [messages, setMessages] = useState<Message[]>([
@@ -19,9 +25,7 @@ const ChatArea = ({ previousMessages }: { previousMessages: Message[] }) => {
     ...previousMessages,
   ]);
 
-  const [checkpointId, setCheckpointId] = useState(
-    "4647cc2b-3e7a-44db-9de2-59f49c02b889"
-  );
+  const [checkpointId, setCheckpointId] = useState(threadId);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
