@@ -14,7 +14,7 @@ const Header = () => {
 
       <div className="flex items-center space-x-1">
         <Link
-          href={"/about"}
+          href={"/new-chat"}
           className="text-white/80 text-xs px-4 py-2 font-medium hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 hover:cursor-pointer"
         >
           NEW CHAT

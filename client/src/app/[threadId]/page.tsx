@@ -11,7 +11,6 @@ const ThreadPage = async ({ params }: { params: { threadId: string } }) => {
       {/* Main container with refined shadow and border */}
       <div className="w-[70%] rounded-xl shadow-lg border border-slate-700">
         <ChatArea previousMessages={messages} threadId={threadId} />
-        {/* <PreviousThreadList threadList={threadList} /> */}
       </div>
     </div>
   );

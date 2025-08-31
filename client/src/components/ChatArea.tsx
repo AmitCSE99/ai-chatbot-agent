@@ -11,7 +11,7 @@ const ChatArea = ({
   threadId,
 }: {
   previousMessages: Message[];
-  threadId: string;
+  threadId?: string;
 }) => {
   const [currentMessage, setCurrentMessage] = useState("");
 

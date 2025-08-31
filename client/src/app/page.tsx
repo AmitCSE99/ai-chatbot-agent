@@ -1,3 +1,4 @@
+import ClientSideRefresh from "@/components/ClientSideRefresh";
 import PreviousThreadList from "@/components/PreviousThreadList";
 import { fetchPreviousThreads } from "@/utils/fetchPreviousThreads";
 
@@ -22,6 +23,7 @@ export default async function Home() {
   return (
     <div className="flex justify-center py-8 px-4">
       {/* Main container with refined shadow and border */}
+      <ClientSideRefresh />
       <div className="w-[70%] rounded-xl shadow-lg border border-slate-700">
         <PreviousThreadList threadList={threadList} />
       </div>
