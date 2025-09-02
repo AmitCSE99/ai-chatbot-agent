@@ -132,10 +132,9 @@ async def get_chats(thread_id: str):
             "thread_id": thread_id
         }
     }
+    # create the agent graph
     agent_graph: CompiledStateGraph = app.state.agent_graph
     data = await agent_graph.aget_state(config=config)
-
-    print(data.values['messages'])
 
     response = {
         "messages": []
